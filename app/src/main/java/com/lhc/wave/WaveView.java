@@ -40,7 +40,6 @@ public class WaveView extends View {
     private Matrix matrix;
     private Bitmap shipBitmap;
     private PathMeasure pathMeasure;
-    private float lengthOfWave;
 
     public WaveView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
@@ -88,12 +87,12 @@ public class WaveView extends View {
 
         canvas.drawBitmap(shipBitmap, matrix, null);
 
-        paint.setStrokeWidth(1);
-        paint.setColor(Color.RED);
-        canvas.drawLine(0f, (float) centerY, (float) getWidth(), (float) centerY, paint);
-        canvas.drawLine(centerX, 0, centerX, getHeight(), paint);
+//        paint.setStrokeWidth(1);
+//        paint.setColor(Color.RED);
+//        canvas.drawLine(0f, (float) centerY, (float) getWidth(), (float) centerY, paint);
+//        canvas.drawLine(centerX, 0, centerX, getHeight(), paint);
 
-//        postInvalidate();
+        postInvalidate();
     }
 
     private void drawStrokeCircle(Canvas canvas) {
@@ -167,8 +166,10 @@ public class WaveView extends View {
 
         pathMeasure.setPath(secondWavePath, false);
         matrix.reset();
-        //TODO 此处有个计算错误尚未解决，想要保持小船在圆心，需要减去这段移动距离的曲线长度而不是减去移动距离
-        pathMeasure.getMatrix(pathMeasure.getLength() / 2 - (secondWavePosX + 2 * waveWidth), matrix, PathMeasure.POSITION_MATRIX_FLAG | PathMeasure.TANGENT_MATRIX_FLAG);
+
+        float per = (2 * waveWidth - Math.abs(secondWavePosX)) * 1f / (2 * waveWidth);
+        float length = (pathMeasure.getLength() / (WAVE_COUNT + 2)) * per;
+        pathMeasure.getMatrix(pathMeasure.getLength() / 2 - length, matrix, PathMeasure.POSITION_MATRIX_FLAG | PathMeasure.TANGENT_MATRIX_FLAG);
         matrix.preTranslate(-shipBitmap.getWidth() / 2, -shipBitmap.getHeight());
 
         secondWavePath.rLineTo(0, getHeight());
